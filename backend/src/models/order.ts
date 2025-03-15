@@ -59,10 +59,16 @@ const orderSchema: Schema = new Schema(
         phone: {
             type: String,
             required: [true, 'Поле "phone" должно быть заполнено'],
-            validate: {
-                validator: (v: string) => phoneRegExp.test(v),
-                message: 'Поле "phone" должно быть валидным телефоном.',
-            },
+            validate: [
+                {
+                    validator: (v: string) => phoneRegExp.test(v),
+                    message: 'Поле "phone" должно быть валидным телефоном.',
+                },
+                {
+                    validator: (v: string) => v.length <= 20, // Максимальная длина 20 символов
+                    message: 'Номер телефона не должен превышать 20 символов',
+                },
+            ],
         },
         comment: {
             type: String,
