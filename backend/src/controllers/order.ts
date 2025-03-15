@@ -9,12 +9,35 @@ import User from '../models/user'
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
 
+const dangerousOperators = ['$expr', '$function', '$where', '$accumulator', '$map', '$reduce'];
+
+const hasDangerousOperators = (obj: any): boolean => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key of Object.keys(obj)) {
+        if (dangerousOperators.includes(key)) {
+            return true;
+        }
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+            if (hasDangerousOperators(obj[key])) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
 export const getOrders = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
+        
+        // Проверка на опасные операторы
+        if (hasDangerousOperators(req.query)) {
+            throw new BadRequestError('Использование опасных операторов запрещено');
+        }
+
         const {
             page = 1,
             limit = 10,
@@ -33,11 +56,11 @@ export const getOrders = async (
         const filters: FilterQuery<Partial<IOrder>> = {}
 
         if (status) {
-            if (typeof status === 'object') {
-                Object.assign(filters, status)
+            if (typeof status === 'object' && hasDangerousOperators(status)) {
+                throw new BadRequestError('Использование опасных операторов запрещено');
             }
             if (typeof status === 'string') {
-                filters.status = status
+                filters.status = status;
             }
         }
 
