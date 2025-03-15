@@ -3,6 +3,7 @@ import { FilterQuery, Error as MongooseError, Types } from 'mongoose'
 import validator from 'validator'
 import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
+import ForbiddenError from '../errors/forbidden-error'
 import Order, { IOrder } from '../models/order'
 import Product, { IProduct } from '../models/product'
 import User from '../models/user'
@@ -45,6 +46,12 @@ export const getOrders = async (
             throw new BadRequestError(
                 'Использование опасных операторов запрещено'
             )
+        }
+
+        // Проверка роли пользователя
+        const userRoles = res.locals.user.roles;
+        if (!userRoles.includes('admin')) {
+            return next(new ForbiddenError('Доступ запрещен'));
         }
 
         const {
