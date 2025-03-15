@@ -22,3 +22,7 @@ export const REFRESH_TOKEN = {
         } as CookieOptions,
     },
 }
+
+export const MAX_REQUEST_PER_MINUTE = 20
+export const MAX_FILE_SIZE = 10 * 1024 * 1024
+export const MIN_FILE_SIZE = 2 * 1024
