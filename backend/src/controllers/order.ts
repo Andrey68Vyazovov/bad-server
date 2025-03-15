@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { FilterQuery, Error as MongooseError, Types } from 'mongoose'
+import validator from 'validator'
 import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
 import Order, { IOrder } from '../models/order'
@@ -9,22 +10,29 @@ import User from '../models/user'
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
 
-const dangerousOperators = ['$expr', '$function', '$where', '$accumulator', '$map', '$reduce'];
+const dangerousOperators = [
+    '$expr',
+    '$function',
+    '$where',
+    '$accumulator',
+    '$map',
+    '$reduce',
+]
 
 const hasDangerousOperators = (obj: any): boolean => {
     // eslint-disable-next-line no-restricted-syntax
     for (const key of Object.keys(obj)) {
         if (dangerousOperators.includes(key)) {
-            return true;
+            return true
         }
         if (typeof obj[key] === 'object' && obj[key] !== null) {
             if (hasDangerousOperators(obj[key])) {
-                return true;
+                return true
             }
         }
     }
-    return false;
-};
+    return false
+}
 
 export const getOrders = async (
     req: Request,
@@ -32,10 +40,11 @@ export const getOrders = async (
     next: NextFunction
 ) => {
     try {
-        
         // Проверка на опасные операторы
         if (hasDangerousOperators(req.query)) {
-            throw new BadRequestError('Использование опасных операторов запрещено');
+            throw new BadRequestError(
+                'Использование опасных операторов запрещено'
+            )
         }
 
         const {
@@ -57,10 +66,12 @@ export const getOrders = async (
 
         if (status) {
             if (typeof status === 'object' && hasDangerousOperators(status)) {
-                throw new BadRequestError('Использование опасных операторов запрещено');
+                throw new BadRequestError(
+                    'Использование опасных операторов запрещено'
+                )
             }
             if (typeof status === 'string') {
-                filters.status = status;
+                filters.status = status
             }
         }
 
@@ -321,6 +332,12 @@ export const createOrder = async (
         const { address, payment, phone, total, email, items, comment } =
             req.body
 
+        if (typeof phone !== 'string' || phone.length > 15) {
+            return next(
+                new BadRequestError('Недопустимая длина номера телефона')
+            )
+        }
+
         items.forEach((id: Types.ObjectId) => {
             const product = products.find((p) =>
                 (p._id as Types.ObjectId)._id.equals(id)
@@ -338,13 +355,15 @@ export const createOrder = async (
             return next(new BadRequestError('Неверная сумма заказа'))
         }
 
+        const sanitizedComment = comment ? validator.escape(comment) : ''
+
         const newOrder = new Order({
             totalAmount: total,
             products: items,
             payment,
             phone,
             email,
-            comment,
+            comment: sanitizedComment,
             customer: userId,
             deliveryAddress: address,
         })
