@@ -332,7 +332,7 @@ export const createOrder = async (
         const { address, payment, phone, total, email, items, comment } =
             req.body
 
-        if (typeof phone !== 'string' || phone.length > 15) {
+        if (typeof phone !== 'string' || phone.length > 20) {
             return next(
                 new BadRequestError('Недопустимая длина номера телефона')
             )
