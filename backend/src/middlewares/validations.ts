@@ -37,8 +37,9 @@ export const validateOrderBody = celebrate({
         }),
         phone: Joi.string()
         .required()
+        .min(10)
+        .max(20)
         .pattern(phoneRegExp)
-        .max(20) // Ограничение длины номера телефона до 20 символов
         .messages({
             'string.empty': 'Не указан телефон',
             'string.max': 'Номер телефона не должен превышать 20 символов',

@@ -332,12 +332,6 @@ export const createOrder = async (
         const { address, payment, phone, total, email, items, comment } =
             req.body
 
-        if (typeof phone !== 'string' || phone.length > 20) {
-            return next(
-                new BadRequestError('Недопустимая длина номера телефона')
-            )
-        }
-
         items.forEach((id: Types.ObjectId) => {
             const product = products.find((p) =>
                 (p._id as Types.ObjectId)._id.equals(id)
