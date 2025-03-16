@@ -16,7 +16,10 @@ const app = express();
 
 // Middleware
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // Разрешить запросы только с этого домена
+    credentials: true, // Разрешить передачу кук и заголовков авторизации
+}));
 app.use(serveStatic(path.join(__dirname, 'public')));
 app.use(urlencoded({ extended: true }));
 app.use(json());
@@ -25,7 +28,10 @@ app.use(json());
 app.use(limiter);
 
 // Маршруты
-app.options('*', cors());
+app.options('*', cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
 app.use(routes);
 
 // Обработка ошибок
