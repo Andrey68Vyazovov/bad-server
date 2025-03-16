@@ -13,12 +13,13 @@ import routes from './routes';
 import { limiter } from './middlewares/limiter';
 
 const { PORT = 3000 } = process.env;
+export const ORIGIN_ALLOW = process.env.ORIGIN_ALLOW || 'http://localhost:5173';
 const app = express();
 
 // Middleware
 app.use(cookieParser(COOKIES_SECRET));
 app.use(cors({
-    origin: 'http://localhost', // Разрешить запросы только с этого домена
+    origin: ORIGIN_ALLOW, // Разрешить запросы только с этого домена
     credentials: true, // Разрешить передачу кук и заголовков авторизации
     allowedHeaders: ['Authorization', 'Content-Type', 'X-CSRF-Token'],
 }));
@@ -32,7 +33,7 @@ app.use(limiter);
 
 // Маршруты
 app.options('*', cors({
-    origin: 'http://localhost',
+    origin: ORIGIN_ALLOW,
     credentials: true,
 }));
 app.use(routes);
