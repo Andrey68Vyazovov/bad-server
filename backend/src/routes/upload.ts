@@ -7,6 +7,7 @@ uploadRouter.post(
   '/',
   fileMiddleware.upload.single('file'),
   fileMiddleware.fileSizeCheck,
+  fileMiddleware.imageDimensionsCheck,
   uploadFile
 )
 
