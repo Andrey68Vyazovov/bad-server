@@ -30,7 +30,8 @@ const storage = multer.diskStorage({
         file: Express.Multer.File,
         cb: FileNameCallback
     ) => {
-        cb(null, faker.string.uuid() + extname(file?.originalname))
+        const uniqueFileName = `${faker.string.uuid()}${extname(file.originalname)}`
+        cb(null, uniqueFileName)
     },
 })
 
@@ -127,7 +128,7 @@ async function imageDimensionsCheck(
 const upload = multer({
     storage,
     fileFilter,
-    limits: { fileSize: MAX_FILE_SIZE },
+  // limits: { fileSize: MAX_FILE_SIZE },
 })
 
 export default { upload, fileSizeCheck, imageDimensionsCheck }
