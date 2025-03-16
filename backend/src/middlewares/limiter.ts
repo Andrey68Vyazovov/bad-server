@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { rateLimit } from 'express-rate-limit'
 import { constants } from 'http2'
 import { MAX_REQUEST_PER_MINUTE } from '../config'

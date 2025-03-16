@@ -1,7 +1,7 @@
 import { Request, Express, Response, NextFunction } from 'express'
 import multer, { FileFilterCallback } from 'multer'
 import { join, extname } from 'path'
- import { faker } from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 import sharp from 'sharp'
 import { MAX_FILE_SIZE, MIN_FILE_SIZE } from '../config'
 
@@ -14,15 +14,14 @@ const storage = multer.diskStorage({
         _file: Express.Multer.File,
         cb: DestinationCallback
     ) => {
-        cb(
-            null,
-            join(
-                __dirname,
-                process.env.UPLOAD_PATH_TEMP
-                    ? `../public/${process.env.UPLOAD_PATH_TEMP}`
-                    : '../public'
-            )
+        const destinationPath = join(
+            __dirname,
+            process.env.UPLOAD_PATH_TEMP
+                ? `../public/${process.env.UPLOAD_PATH_TEMP}`
+                : '../public'
         )
+        console.log('File will be saved to:', destinationPath) // Логирование пути
+        cb(null, destinationPath)
     },
 
     filename: (
@@ -31,6 +30,7 @@ const storage = multer.diskStorage({
         cb: FileNameCallback
     ) => {
         const uniqueFileName = `${faker.string.uuid()}${extname(file.originalname)}`
+        console.log('Generated unique filename:', uniqueFileName) // Логирование имени файла
         cb(null, uniqueFileName)
     },
 })
@@ -128,7 +128,7 @@ async function imageDimensionsCheck(
 const upload = multer({
     storage,
     fileFilter,
-  // limits: { fileSize: MAX_FILE_SIZE },
+    // limits: { fileSize: MAX_FILE_SIZE },
 })
 
 export default { upload, fileSizeCheck, imageDimensionsCheck }

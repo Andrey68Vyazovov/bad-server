@@ -5,31 +5,34 @@ import 'dotenv/config';
 import express, { json, urlencoded } from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
-import { DB_ADDRESS } from './config';
+import mongoSanitize from 'express-mongo-sanitize';
+import { COOKIES_SECRET, MAX_BODY_SIZE, DB_ADDRESS } from './config';
 import errorHandler from './middlewares/error-handler';
 import serveStatic from './middlewares/serverStatic';
 import routes from './routes';
-import { limiter } from './middlewares/limiter'; // Импортируем лимитер
+import { limiter } from './middlewares/limiter';
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
 // Middleware
-app.use(cookieParser());
+app.use(cookieParser(COOKIES_SECRET));
 app.use(cors({
-    origin: 'http://localhost:5173', // Разрешить запросы только с этого домена
+    origin: 'http://localhost', // Разрешить запросы только с этого домена
     credentials: true, // Разрешить передачу кук и заголовков авторизации
+    allowedHeaders: ['Authorization', 'Content-Type', 'X-CSRF-Token'],
 }));
 app.use(serveStatic(path.join(__dirname, 'public')));
 app.use(urlencoded({ extended: true }));
-app.use(json());
+app.use(mongoSanitize());
+app.use(json({ limit: MAX_BODY_SIZE }));
 
 // Лимитер применяется ко всем маршрутам
 app.use(limiter);
 
 // Маршруты
 app.options('*', cors({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost',
     credentials: true,
 }));
 app.use(routes);
